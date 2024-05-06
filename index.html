@@ -179,6 +179,7 @@
           locale: "ru",
           interaction: { keyboard: true },
           manipulation: { enabled: false },
+          nodes: { color: "#FCD197" }
         };
         network1 = new vis.Network(document.getElementById("mynetwork1"), data, options1);
         network2 = new vis.Network(document.getElementById("mynetwork2"), data2, options2);
@@ -205,8 +206,10 @@
       function init() {
         draw();
         network1.on("selectNode", function (params){
-            params.event="[original event]";
             network2.selectNodes(params.nodes);
+        });
+        network1.on("deselectNode", function (params){
+            network2.unselectAll();
         })
       }
     </script>
