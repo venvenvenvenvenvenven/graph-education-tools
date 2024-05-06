@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Vis Network | Manipulation | Manipulation with Localization</title>
+
+    <style type="text/css">
+      body,
+      select {
+        font: 10pt sans;
+      }
+      #mynetwork1 {
+        position: relative;
+        width: 800px;
+        height: 600px;
+        border: 1px solid lightgray;
+        float: left;
+      }
+      #mynetwork2 {
+        position: relative;
+        width: 800px;
+        height: 600px;
+        border: 1px solid lightgray;
+        float: right;
+      }
+      table.legend_table {
+        font-size: 11px;
+        border-width: 1px;
+        border-color: #d3d3d3;
+        border-style: solid;
+      }
+      table.legend_table,
+      td {
+        border-width: 1px;
+        border-color: #d3d3d3;
+        border-style: solid;
+        padding: 2px;
+      }
+      div.table_content {
+        width: 80px;
+        text-align: center;
+      }
+      div.table_description {
+        width: 100px;
+      }
+
+      #operation {
+        font-size: 28px;
+      }
+      #network-popUp {
+        display: none;
+        position: absolute;
+        top: 350px;
+        left: 170px;
+        z-index: 299;
+        width: 250px;
+        height: 120px;
+        background-color: #f9f9f9;
+        border-style: solid;
+        border-width: 3px;
+        border-color: #5394ed;
+        padding: 10px;
+        text-align: center;
+      }
+    </style>
+
+    <script
+      type="text/javascript"
+      src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
+    ></script>
+
+    <script
+      type="text/javascript"
+      src="https://unpkg.com/alea@1.0.0/alea.js"
+    ></script>
+    <script type="text/javascript" src="exampleUtil.js"></script>
+
+    <script type="text/javascript">
+      var nodes = null;
+      var edges = null;
+      var network1 = null;
+      // randomly create some nodes and edges
+      var data = getScaleFreeNetwork(6);
+      var seed = 2;
+
+      // создание дополнения
+      function compGraph(network1, network2){
+        let nodes = data.nodes;
+        let edges = [];
+        edgesId = 0;
+        for(let i = 0; i < nodes.length; i++){
+            for(let k = 0; k < nodes.length; k++){
+                if(k == i){
+                    continue;
+                }else{
+                    exists = false;
+                    for(let e = 0; e < data.edges.length; e++){ // проверяем, что ребра нет в исходном графе
+                        if((data.edges[e].from == data.nodes[i].id & data.edges[e].to == data.nodes[k].id) || (data.edges[e].to == data.nodes[i].id & data.edges[e].from == data.nodes[k].id)){
+                            exists = true;
+                        }
+                    }
+                    for(let e = 0; e < edges.length; e++){  // проверяем, что ребро не дублируется
+                        if((edges[e].from == nodes[i].id & edges[e].to == nodes[k].id) || (edges[e].from == nodes[k].id & edges[e].to == nodes[i].id)){
+                            exists = true;
+                        }                  
+                    }
+                    if(exists){
+                        continue;
+                    }else{
+                        edges.push({from: nodes[i].id, to: nodes[k].id, id: edgesId++})
+                    }
+                }
+            }
+        }
+        return { nodes: nodes, edges: edges };
+        }
+      var data2 = compGraph(data);
+      console.log(data2);
+
+      function destroy() {
+        if (network1 !== null) {
+          network1.destroy();
+          network1 = null;
+        }
+      }
+
+      function draw() {
+        destroy();
+        nodes = [];
+        edges = [];
+
+        // create a network
+        var container = document.getElementById("mynetwork1");
+        var options = {
+          layout: { randomSeed: seed }, // just to make sure the layout is the same when the locale is changed
+          locale: "ru",
+          interaction: { keyboard: true },
+          manipulation: {
+            addNode: function (data, callback) {
+              // filling in the popup DOM elements
+              document.getElementById("operation").innerText = "Add Node";
+              document.getElementById("node-id").value = data.id;
+              document.getElementById("node-label").value = data.label;
+              document.getElementById("saveButton").onclick = saveData.bind(
+                this,
+                data,
+                callback
+              );
+              document.getElementById("cancelButton").onclick =
+                clearPopUp.bind();
+              document.getElementById("network-popUp").style.display = "block";
+            },
+            editNode: function (data, callback) {
+              // filling in the popup DOM elements
+              document.getElementById("operation").innerText = "Edit Node";
+              document.getElementById("node-id").value = data.id;
+              document.getElementById("node-label").value = data.label;
+              document.getElementById("saveButton").onclick = saveData.bind(
+                this,
+                data,
+                callback
+              );
+              document.getElementById("cancelButton").onclick = cancelEdit.bind(
+                this,
+                callback
+              );
+              document.getElementById("network-popUp").style.display = "block";
+            },
+            addEdge: function (data, callback) {
+              if (data.from == data.to) {
+                  callback(null);
+              } else {
+                callback(data);
+              }
+            },
+          },
+        };
+        network1 = new vis.Network(document.getElementById("mynetwork1"), data, options);
+        network2 = new vis.Network(document.getElementById("mynetwork2"), data2, options);
+      }
+
+      function clearPopUp() {
+        document.getElementById("saveButton").onclick = null;
+        document.getElementById("cancelButton").onclick = null;
+        document.getElementById("network-popUp").style.display = "none";
+      }
+
+      function cancelEdit(callback) {
+        clearPopUp();
+        callback(null);
+      }
+
+      function saveData(data, callback) {
+        data.id = document.getElementById("node-id").value;
+        data.label = document.getElementById("node-label").value;
+        clearPopUp();
+        callback(data);
+      }
+
+      function init() {
+        draw();
+      }
+    </script>
+  </head>
+
+  <body onload="init();">
+    <h2>Editing the nodes and edges (localized)</h2>
+
+    <div id="network-popUp">
+      <span id="operation">node</span> <br />
+      <table style="margin: auto">
+        <tr>
+          <td>id</td>
+          <td><input id="node-id" value="new value" /></td>
+        </tr>
+        <tr>
+          <td>label</td>
+          <td><input id="node-label" value="new value" /></td>
+        </tr>
+      </table>
+      <input type="button" value="save" id="saveButton" />
+      <input type="button" value="cancel" id="cancelButton" />
+    </div>
+    <br />
+    <div id="mynetwork1"></div>
+    <div id="mynetwork2"></div>
+  </body>
+</html>
