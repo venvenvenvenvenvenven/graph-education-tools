@@ -130,8 +130,7 @@
         edges = [];
 
         // create a network
-        var container = document.getElementById("mynetwork1");
-        var options = {
+        var options1 = {
           layout: { randomSeed: seed }, // just to make sure the layout is the same when the locale is changed
           locale: "ru",
           interaction: { keyboard: true },
@@ -175,8 +174,14 @@
             },
           },
         };
-        network1 = new vis.Network(document.getElementById("mynetwork1"), data, options);
-        network2 = new vis.Network(document.getElementById("mynetwork2"), data2, options);
+        var options2 = {
+          layout: { randomSeed: seed }, // just to make sure the layout is the same when the locale is changed
+          locale: "ru",
+          interaction: { keyboard: true },
+          manipulation: { enabled: false },
+        };
+        network1 = new vis.Network(document.getElementById("mynetwork1"), data, options1);
+        network2 = new vis.Network(document.getElementById("mynetwork2"), data2, options2);
       }
 
       function clearPopUp() {
@@ -199,6 +204,10 @@
 
       function init() {
         draw();
+        network1.on("selectNode", function (params){
+            params.event="[original event]";
+            network2.selectNodes(params.nodes);
+        })
       }
     </script>
   </head>
