@@ -39,13 +39,13 @@ function loadJSON(path, success, error) {
  * @param nodeCount
  */
 function getScaleFreeNetwork(nodeCount) {
-  const nodes = [];
-  const edges = [];
+  const nodes = new vis.DataSet([]);
+  const edges = new vis.DataSet([]);
   const connectionCount = [];
 
   // randomly create some nodes and edges
   for (let i = 0; i < nodeCount; i++) {
-    nodes.push({
+    nodes.add({
       id: i,
       label: String(i),
     });
@@ -56,7 +56,7 @@ function getScaleFreeNetwork(nodeCount) {
     if (i == 1) {
       const from = i;
       const to = 0;
-      edges.push({
+      edges.add({
         from: from,
         to: to,
       });
@@ -74,7 +74,7 @@ function getScaleFreeNetwork(nodeCount) {
 
       const from = i;
       const to = j;
-      edges.push({
+      edges.add({
         from: from,
         to: to,
       });
@@ -86,7 +86,7 @@ function getScaleFreeNetwork(nodeCount) {
   return { nodes: nodes, edges: edges };
 }
 
-seededRandom = Alea("SEED");
+seededRandom = Alea();
 
 /**
  * @param nodeCount
