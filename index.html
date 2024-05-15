@@ -164,14 +164,22 @@
               network2.setData(compGraph(network1.body.data));
             },
             addEdge: function (data, callback) {
-              if (data.from == data.to) {
+              if (data.from == data.to) { // петли делать нельзя
                   callback(null);
-              } else {
-                callback(data);
-                network2.setData(compGraph(network1.body.data));
-              }
+              } else{
+                    callback(data);
+                    network2.setData(compGraph(network1.body.data));
+                  }
+                },
+            deleteEdge: function (data, callback){
+              callback(data);
+              network2.setData(compGraph(network1.body.data));
             },
-          },
+            deleteNode: function (data, callback){
+              callback(data);
+              network2.setData(compGraph(network1.body.data));
+            },
+          }
         };
         var options2 = {
           locale: "ru",
