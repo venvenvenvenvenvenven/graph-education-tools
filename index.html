@@ -192,24 +192,6 @@
         console.log(network1)
       }
 
-      function clearPopUp() {
-        document.getElementById("saveButton").onclick = null;
-        document.getElementById("cancelButton").onclick = null;
-        document.getElementById("network-popUp").style.display = "none";
-      }
-
-      function cancelEdit(callback) {
-        clearPopUp();
-        callback(null);
-      }
-
-      function saveData(data, callback) {
-        data.id = document.getElementById("node-id").value;
-        data.label = document.getElementById("node-label").value;
-        clearPopUp();
-        callback(data);
-      }
-
       function init() {
         draw();
         network1.on("selectNode", function (params){
