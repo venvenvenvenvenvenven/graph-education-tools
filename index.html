@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Vis Network | Manipulation | Manipulation with Localization</title>
+    <title>Образовательная среда для графов</title>
 
     <style type="text/css">
       body,
@@ -47,21 +47,14 @@
       #operation {
         font-size: 28px;
       }
-      #network-popUp {
-        display: none;
-        position: absolute;
-        top: 350px;
-        left: 170px;
-        z-index: 299;
-        width: 250px;
-        height: 120px;
-        background-color: #f9f9f9;
-        border-style: solid;
-        border-width: 3px;
-        border-color: #5394ed;
+      textarea {
+        width: 75%;
+        height: 300px;
         padding: 10px;
-        text-align: center;
+        left: 50%;
+        margin-top: 20px;
       }
+      
     </style>
 
     <script
@@ -201,29 +194,39 @@
             network2.unselectAll();
         })
       }
+      function exportNetwork(){
+        nodes = network1.body.data.nodes.get();
+        edges = network1.body.data.edges.get();
+        data = {nodes: nodes, edges: edges};
+        document.getElementById("input_output").value = JSON.stringify(data);
+      }
+      function importNetwork(){
+        data = JSON.parse(document.getElementById("input_output").value);
+        network1.setData(data);
+        network2.setData(compGraph(network1.body.data))
+      }
     </script>
   </head>
 
   <body onload="init();">
     <h2>Дополнительный граф</h2>
-
-    <div id="network-popUp">
-      <span id="operation">node</span> <br />
-      <table style="margin: auto">
-        <tr>
-          <td>id</td>
-          <td><input id="node-id" value="new value" /></td>
-        </tr>
-        <tr>
-          <td>label</td>
-          <td><input id="node-label" value="new value" /></td>
-        </tr>
-      </table>
-      <input type="button" value="save" id="saveButton" />
-      <input type="button" value="cancel" id="cancelButton" />
-    </div>
     <br />
     <div id="mynetwork1"></div>
     <div id="mynetwork2"></div>
+    <div>
+      <textarea id="input_output"></textarea>
+      <input
+        type="button"
+        id="import_button"
+        onclick="importNetwork()"
+        value="import"
+      />
+      <input
+        type="button"
+        id="export_button"
+        onclick="exportNetwork()"
+        value="export"
+      />
+    </div>
   </body>
 </html>
