@@ -71,7 +71,7 @@
       type="text/javascript"
       src="https://unpkg.com/alea@1.0.0/alea.js"
     ></script>
-    <script type="text/javascript" src="exampleUtil.js"></script>
+    <script type="text/javascript" src="randomgen.js"></script>
 
     <script type="text/javascript">
       var custom_locale = {
@@ -94,8 +94,7 @@
       var nodes = null;
       var edges = null;
       var network1 = null;
-      // randomly create some nodes and edges
-      var data = getScaleFreeNetwork(6);
+      var data = randomgen(6);
       var lastNodeId = 5
 
       // создание дополнения
@@ -143,7 +142,6 @@
         destroy();
         console.log(data)
 
-        // create a network
         var options1 = {
           // locales: custom_locale,
           // locale: "ct",
