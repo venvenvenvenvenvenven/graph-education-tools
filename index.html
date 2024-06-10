@@ -85,6 +85,7 @@
       var network1 = null;
       var data = randomgen(6);
       var lastNodeId = 5
+      let cliques = [];
 
       // создание дополнения
       function compGraph(data){
@@ -125,16 +126,30 @@
         network.body.data.nodes.get().forEach((i) => ids.push(i.id));
         return ids;
       }
-      function BK(N, R, P, X){
+      function BK(N, R, P, X, C){
         if(P.length == 0 && X.length == 0){
-          console.log("Clique " + R);
+          C.push(R);
         }
         for(let v of P){
           NB = N.getConnectedNodes(v)
-          BK(N, _.union(R, [v]), _.intersection(P, NB), _.intersection(X, NB));
+          BK(N, _.union(R, [v]), _.intersection(P, NB), _.intersection(X, NB), C);
           P = _.without(P, v);
           X = _.union(X, [v]);
         }
+      }
+      function partOfClique(id, cliques){
+        partOfCliques = cliques.filter((clique) => clique.includes(id));
+        partOfCliques = _.sortBy(partOfCliques, "length")
+        return partOfCliques[partOfCliques.length-1]
+      }
+      function getCliqueEdges(N, clique){
+        cliqueEdges = []
+        for (let node of clique){
+          cliqueEdges.push(N.getConnectedEdges(node))
+        }
+        console.log(cliqueEdges);
+        console.log(_.intersection.apply(cliqueEdges))
+        return _.intersection.apply(cliqueEdges)
       }
 
       function destroy() {
@@ -165,7 +180,8 @@
             createEdgeError: 'Cannot link edges to a cluster.',
             deleteClusterError: 'Clusters cannot be deleted.',
             editClusterError: 'Clusters cannot be edited.'}
-          },
+          }, // 97c2fc #FCD197
+          nodes: {color: {background: "#97c2fc", border: "#2b7ce9", highlight: {background: "#ffdcad", border: "#c99e64"}}},
           locale: "en",
           interaction: { keyboard: true },
           manipulation: {
@@ -199,7 +215,7 @@
           locale: "ru",
           interaction: { keyboard: true },
           manipulation: { enabled: false },
-          nodes: { color: "#C2FC97" }
+          nodes: { color: {background: "#d0ffad", border: "#8fc964", highlight: {background: "#ffb3ad", border: "#c96c64"}}}
         };
         network1 = new vis.Network(document.getElementById("mynetwork1"), data, options1);
         network2 = new vis.Network(document.getElementById("mynetwork2"), data2, options2);
@@ -209,11 +225,15 @@
       function init() {
         draw();
         network1.on("selectNode", function (params){
-            network2.selectNodes(params.nodes);
+          clique = partOfClique(params.nodes[0], cliques);
+          network1.selectEdges(getCliqueEdges(network1, clique));
+          network1.selectNodes(clique);
+          network2.selectNodes(clique, false);
         });
         network1.on("deselectNode", function (params){
             network2.unselectAll();
-        })
+        });
+        BK(network1, [], nodeIds(network1), [], cliques);
       }
       function exportNetwork(){
         nodes = network1.body.data.nodes.get();
@@ -250,7 +270,7 @@
       <input
         type="button"
         id="BK_button"
-        onclick="console.log(BK(network1, [], nodeIds(network1), []))"
+        onclick="console.log(BK(network1, [], nodeIds(network1), [], cliques)); console.log(cliques); console.log(partOfClique(0, cliques))"
         value="BK"
       />
     </div>
