@@ -71,26 +71,15 @@
       type="text/javascript"
       src="https://unpkg.com/alea@1.0.0/alea.js"
     ></script>
+
     <script type="text/javascript" src="randomgen.js"></script>
 
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/underscore@1.13.6/underscore-umd-min.js"
+    ></script>
+
     <script type="text/javascript">
-      var custom_locale = {
-        "ct": {
-          edit: 'Редактировать',
-          del: 'Удалить выбранное',
-          back: 'Назад',
-          addNode: 'Добавить вершину',
-          addEdge: 'Добавить ребро',
-          editNode: 'Редактировать вершину',
-          editEdge: 'Редактировать ребро',
-          addDescription: 'Кликните в свободное место, чтобы добавить новую вершину.',
-          edgeDescription: 'Кликните на вершину и протяните ребро к другой вершине, чтобы соединить их.',
-          editEdgeDescription: 'Click on the control points and drag them to a node to connect to it.',
-          createEdgeError: 'Cannot link edges to a cluster.',
-          deleteClusterError: 'Clusters cannot be deleted.',
-          editClusterError: 'Clusters cannot be edited.'
-        }
-      }
       var nodes = null;
       var edges = null;
       var network1 = null;
@@ -130,6 +119,23 @@
         return { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
         }
       var data2 = compGraph(data);
+      // алгоритм Брона-Кербоша
+      function nodeIds(network){
+        ids = [];
+        network.body.data.nodes.get().forEach((i) => ids.push(i.id));
+        return ids;
+      }
+      function BK(N, R, P, X){
+        if(P.length == 0 && X.length == 0){
+          console.log("Clique " + R);
+        }
+        for(v of P){
+          NB = N.getConnectedNodes(v)
+          BK(N, _.union(R, [v]), _.intersection(P, NB), _.intersection(X, NB));
+          P = _.without(P, v);
+          X = _.union(X, [v]);
+        }
+      }
 
       function destroy() {
         if (network1 !== null) {
@@ -143,8 +149,24 @@
         console.log(data)
 
         var options1 = {
-          // locales: custom_locale,
-          // locale: "ct",
+          locales:
+          custom_locale = {
+            "en":
+            {edit: 'Редактировать',
+            del: 'Удалить выбранное',
+            back: 'Назад',
+            addNode: 'Добавить вершину',
+            addEdge: 'Добавить ребро',
+            editNode: 'Редактировать вершину',
+            editEdge: 'Редактировать ребро',
+            addDescription: 'Кликните в свободное место, чтобы добавить новую вершину.',
+            edgeDescription: 'Кликните на вершину и протяните ребро к другой вершине, чтобы соединить их.',
+            editEdgeDescription: 'Click on the control points and drag them to a node to connect to it.', // кластеры не используются
+            createEdgeError: 'Cannot link edges to a cluster.',
+            deleteClusterError: 'Clusters cannot be deleted.',
+            editClusterError: 'Clusters cannot be edited.'}
+          },
+          locale: "en",
           interaction: { keyboard: true },
           manipulation: {
             addNode: function (nodeData,callback) {
@@ -153,6 +175,7 @@
               nodeData.label = String(lastNodeId);
               callback(nodeData);
               network2.setData(compGraph(network1.body.data));
+
             },
             addEdge: function (data, callback) {
               if (data.from == data.to) { // петли делать нельзя
@@ -223,6 +246,12 @@
         id="export_button"
         onclick="exportNetwork()"
         value="export"
+      />
+      <input
+        type="button"
+        id="BK_button"
+        onclick="console.log(BK(network1, [], nodeIds(network1), []))"
+        value="BK"
       />
     </div>
   </body>
