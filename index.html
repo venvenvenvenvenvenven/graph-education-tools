@@ -129,7 +129,7 @@
         if(P.length == 0 && X.length == 0){
           console.log("Clique " + R);
         }
-        for(v of P){
+        for(let v of P){
           NB = N.getConnectedNodes(v)
           BK(N, _.union(R, [v]), _.intersection(P, NB), _.intersection(X, NB));
           P = _.without(P, v);
