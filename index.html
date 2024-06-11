@@ -143,13 +143,13 @@
         return partOfCliques[partOfCliques.length-1]
       }
       function getCliqueEdges(N, clique){
-        cliqueEdges = []
-        for (let node of clique){
-          cliqueEdges.push(N.getConnectedEdges(node))
-        }
-        console.log(cliqueEdges);
-        console.log(_.intersection.apply(cliqueEdges))
-        return _.intersection.apply(cliqueEdges)
+        connectedEdges = [];
+        for(let v of clique){
+          connectedEdges.push(N.getConnectedEdges(v))
+        };
+        nodeEdges = N.body.data.edges.get();
+        cliqueEdges = nodeEdges.filter((edge) => ((connectedEdges.flat().includes(edge.id)) && (clique.includes(edge.from)) && (clique.includes(edge.to))))
+        return _.pluck(cliqueEdges, "id")
       }
 
       function destroy() {
@@ -180,8 +180,9 @@
             createEdgeError: 'Cannot link edges to a cluster.',
             deleteClusterError: 'Clusters cannot be deleted.',
             editClusterError: 'Clusters cannot be edited.'}
-          }, // 97c2fc #FCD197
+          },
           nodes: {color: {background: "#97c2fc", border: "#2b7ce9", highlight: {background: "#ffdcad", border: "#c99e64"}}},
+          edges: {color: {color: "#2b7ce9", highlight: "#c99e64"}},
           locale: "en",
           interaction: { keyboard: true },
           manipulation: {
@@ -191,7 +192,6 @@
               nodeData.label = String(lastNodeId);
               callback(nodeData);
               network2.setData(compGraph(network1.body.data));
-
             },
             addEdge: function (data, callback) {
               if (data.from == data.to) { // петли делать нельзя
@@ -226,8 +226,7 @@
         draw();
         network1.on("selectNode", function (params){
           clique = partOfClique(params.nodes[0], cliques);
-          network1.selectEdges(getCliqueEdges(network1, clique));
-          network1.selectNodes(clique);
+          network1.setSelection({nodes: clique, edges: getCliqueEdges(network1, clique)}, {unselectAll: true, highlightEdges: false});
           network2.selectNodes(clique, false);
         });
         network1.on("deselectNode", function (params){
