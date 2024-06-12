@@ -1,1 +1,1 @@
-npm install vis-network
+
