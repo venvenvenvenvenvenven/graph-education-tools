@@ -136,7 +136,6 @@ function draw() {
     nodes: {color: {background: "#97c2fc", border: "#2b7ce9", highlight: {background: "#ffdcad", border: "#c99e64"}}},
     edges: {color: {color: "#2b7ce9", highlight: "#c99e64"}},
     locale: "en",
-    interaction: { keyboard: true },
     manipulation: {
       addNode: function (nodeData,callback) {
         lastNodeId++;
