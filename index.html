@@ -9,52 +9,41 @@
       select {
         font: 10pt sans;
       }
-      #mynetwork1 {
-        position: relative;
+      table{
+        width: 100%;
+        height: 70%;
+      }
+      .network_td{
         width: 45%;
-        height: 600px;
+        height: 70%;
         border: 1px solid lightgray;
-        float: left;
       }
-      #mynetwork2 {
-        position: relative;
+      .io_td{
         width: 45%;
+        margin-top: 20px;
+      }
+      .bk_td{
+        width: 45%;
+      }
+      .network_div{
+        width: 100%;
         height: 600px;
-        border: 1px solid lightgray;
-        float: right;
       }
-      table.legend_table {
-        font-size: 11px;
-        border-width: 1px;
-        border-color: #d3d3d3;
-        border-style: solid;
-      }
-      table.legend_table,
-      td {
-        border-width: 1px;
-        border-color: #d3d3d3;
-        border-style: solid;
-        padding: 2px;
-      }
-      div.table_content {
-        width: 80px;
+      .io_div, .bk_div{
+        margin-top: 20px;
         text-align: center;
       }
-      div.table_description {
-        width: 100px;
+      .whitespace{
+        width: 5%
       }
-
       #operation {
         font-size: 28px;
       }
-      textarea {
-        width: 75%;
+      #input_output, #bk_box {
         height: 200px;
-        padding: 10px;
-        left: 50%;
-        margin-top: 20px;
+        width: 90%;
+        resize: none;
       }
-      
     </style>
 
     <script
@@ -72,206 +61,84 @@
       src="https://unpkg.com/alea@1.0.0/alea.js"
     ></script>
 
-    <script type="text/javascript" src="randomgen.js"></script>
-
     <script
-      type="text/javascript"
-      src="https://cdn.jsdelivr.net/npm/underscore@1.13.6/underscore-umd-min.js"
-    ></script>
+    type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/underscore@1.13.6/underscore-umd-min.js"
+  ></script>
 
-    <script type="text/javascript">
-      var nodes = null;
-      var edges = null;
-      var network1 = null;
-      var data = randomgen(6);
-      var lastNodeId = 5
-      let cliques = [];
+    <script type="text/javascript" src="randomgen.js"></script>
+    <script type="text/javascript" src="main.js"></script>
 
-      // создание дополнения
-      function compGraph(data){
-        let nodes = data.nodes.get();
-        let ogEdges = data.edges.get()
-        let edges = [];
-        edgesId = 0;
-        for(let i = 0; i < nodes.length; i++){
-            for(let k = 0; k < nodes.length; k++){
-                if(k == i){
-                    continue;
-                }else{
-                    exists = false;
-                    for(let e = 0; e < ogEdges.length; e++){ // проверяем, что ребра нет в исходном графе
-                        if((ogEdges[e].from == nodes[i].id & ogEdges[e].to == nodes[k].id) || (ogEdges[e].to == nodes[i].id & ogEdges[e].from == nodes[k].id)){
-                            exists = true;
-                        }
-                    }
-                    for(let e = 0; e < edges.length; e++){  // проверяем, что ребро не дублируется
-                        if((edges[e].from == nodes[i].id & edges[e].to == nodes[k].id) || (edges[e].from == nodes[k].id & edges[e].to == nodes[i].id)){
-                            exists = true;
-                        }                  
-                    }
-                    if(exists){
-                        continue;
-                    }else{
-                        edges.push({from: nodes[i].id, to: nodes[k].id, id: edgesId++})
-                    }
-                }
-            }
-        }
-        return { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
-        }
-      var data2 = compGraph(data);
-      // алгоритм Брона-Кербоша
-      function nodeIds(network){
-        ids = [];
-        network.body.data.nodes.get().forEach((i) => ids.push(i.id));
-        return ids;
-      }
-      function BK(N, R, P, X, C){
-        if(P.length == 0 && X.length == 0){
-          C.push(R);
-        }
-        for(let v of P){
-          NB = N.getConnectedNodes(v)
-          BK(N, _.union(R, [v]), _.intersection(P, NB), _.intersection(X, NB), C);
-          P = _.without(P, v);
-          X = _.union(X, [v]);
-        }
-      }
-      function partOfClique(id, cliques){
-        partOfCliques = cliques.filter((clique) => clique.includes(id));
-        partOfCliques = _.sortBy(partOfCliques, "length")
-        return partOfCliques[partOfCliques.length-1]
-      }
-      function getCliqueEdges(N, clique){
-        connectedEdges = [];
-        for(let v of clique){
-          connectedEdges.push(N.getConnectedEdges(v))
-        };
-        nodeEdges = N.body.data.edges.get();
-        cliqueEdges = nodeEdges.filter((edge) => ((connectedEdges.flat().includes(edge.id)) && (clique.includes(edge.from)) && (clique.includes(edge.to))))
-        return _.pluck(cliqueEdges, "id")
-      }
-
-      function destroy() {
-        if (network1 !== null) {
-          network1.destroy();
-          network1 = null;
-        }
-      }
-
-      function draw() {
-        destroy();
-        console.log(data)
-
-        var options1 = {
-          locales:
-          custom_locale = {
-            "en":
-            {edit: 'Редактировать',
-            del: 'Удалить выбранное',
-            back: 'Назад',
-            addNode: 'Добавить вершину',
-            addEdge: 'Добавить ребро',
-            editNode: 'Редактировать вершину',
-            editEdge: 'Редактировать ребро',
-            addDescription: 'Кликните в свободное место, чтобы добавить новую вершину.',
-            edgeDescription: 'Кликните на вершину и протяните ребро к другой вершине, чтобы соединить их.',
-            editEdgeDescription: 'Click on the control points and drag them to a node to connect to it.', // кластеры не используются
-            createEdgeError: 'Cannot link edges to a cluster.',
-            deleteClusterError: 'Clusters cannot be deleted.',
-            editClusterError: 'Clusters cannot be edited.'}
-          },
-          nodes: {color: {background: "#97c2fc", border: "#2b7ce9", highlight: {background: "#ffdcad", border: "#c99e64"}}},
-          edges: {color: {color: "#2b7ce9", highlight: "#c99e64"}},
-          locale: "en",
-          interaction: { keyboard: true },
-          manipulation: {
-            addNode: function (nodeData,callback) {
-              lastNodeId++;
-              nodeData.id = lastNodeId;
-              nodeData.label = String(lastNodeId);
-              callback(nodeData);
-              network2.setData(compGraph(network1.body.data));
-            },
-            addEdge: function (data, callback) {
-              if (data.from == data.to) { // петли делать нельзя
-                  callback(null);
-              } else{
-                    callback(data);
-                    network2.setData(compGraph(network1.body.data));
-                  }
-                },
-            deleteEdge: function (data, callback){
-              callback(data);
-              network2.setData(compGraph(network1.body.data));
-            },
-            deleteNode: function (data, callback){
-              callback(data);
-              network2.setData(compGraph(network1.body.data));
-            },
-          }
-        };
-        var options2 = {
-          locale: "ru",
-          interaction: { keyboard: true },
-          manipulation: { enabled: false },
-          nodes: { color: {background: "#d0ffad", border: "#8fc964", highlight: {background: "#ffb3ad", border: "#c96c64"}}}
-        };
-        network1 = new vis.Network(document.getElementById("mynetwork1"), data, options1);
-        network2 = new vis.Network(document.getElementById("mynetwork2"), data2, options2);
-        console.log(network1)
-      }
-
-      function init() {
-        draw();
-        network1.on("selectNode", function (params){
-          clique = partOfClique(params.nodes[0], cliques);
-          network1.setSelection({nodes: clique, edges: getCliqueEdges(network1, clique)}, {unselectAll: true, highlightEdges: false});
-          network2.selectNodes(clique, false);
-        });
-        network1.on("deselectNode", function (params){
-            network2.unselectAll();
-        });
-        BK(network1, [], nodeIds(network1), [], cliques);
-      }
-      function exportNetwork(){
-        nodes = network1.body.data.nodes.get();
-        edges = network1.body.data.edges.get();
-        data = {nodes: nodes, edges: edges};
-        document.getElementById("input_output").value = JSON.stringify(data);
-      }
-      function importNetwork(){
-        data = JSON.parse(document.getElementById("input_output").value);
-        network1.setData(data);
-        network2.setData(compGraph(network1.body.data))
-      }
-    </script>
   </head>
 
   <body onload="init();">
     <br />
-    <div id="mynetwork1"></div>
-    <div id="mynetwork2"></div>
-    <div>
-      <textarea id="input_output"></textarea>
-      <input
-        type="button"
-        id="import_button"
-        onclick="importNetwork()"
-        value="import"
-      />
-      <input
-        type="button"
-        id="export_button"
-        onclick="exportNetwork()"
-        value="export"
-      />
-      <input
-        type="button"
-        id="BK_button"
-        onclick="console.log(BK(network1, [], nodeIds(network1), [], cliques)); console.log(cliques); console.log(partOfClique(0, cliques))"
-        value="BK"
-      />
-    </div>
+    <table>
+      <tr>
+        <td>
+        При выборе вершины на графе слева показывать: 
+         <input type="radio" id="cli1" name="selmode1" value="cli1" checked>
+         <label for="cli1">клику</label>
+         <input type="radio" id="ver1" name="selmode1" value="ver1">
+         <label for="ver1">вершинное покрытие</label>
+         <input type="radio" id="ind1" name="selmode1" value="ind1">
+         <label for="ind1">независимое множество</label>
+        </td>
+        <td class="whitespace"></td>
+        <td>
+          При этом на графе справа показывать: 
+           <input type="radio" id="cli2" name="selmode2" value="cli2">
+           <label for="cli2">клику</label>
+           <input type="radio" id="ver2" name="selmode2" value="ver2">
+           <label for="ver2">вершинное покрытие</label>
+           <input type="radio" id="ind2" name="selmode2" value="ind2" checked>
+           <label for="ind2">независимое множество</label>
+          </td>
+      </tr>
+    <tr>
+      <td class="network_td" id="td1"><div class="network_div" id="mynetwork1"></div></td>
+      <td class="whitespace"></td>
+      <td class="network_td" id="td2""><div class="network_div" id="mynetwork2"></div></td>
+    </tr>
+    <tr>
+      <td class="io_td">
+        <div class="io_div">
+          Сохранение и загрузка графа
+          <br />
+          <textarea id="input_output"></textarea>
+          <br />
+          <input
+            type="button"
+            id="import_button"
+            onclick="importNetwork()"
+            value="Загрузить"
+          />
+          <input
+            type="button"
+            id="export_button"
+            onclick="exportNetwork()"
+            value="Сохранить"
+          />
+        </div>
+      </td>
+      <td class="whitespace"></td>
+      <td class="bk_td">
+        <div class="bk_div">
+          Алгоритм Брона-Кербоша <br />
+          <textarea readonly id='bk_box'></textarea> <br />
+          <input
+          type="button"
+          onclick="document.getElementById('bk_box').value = ''; cliques1 = []; BK(network1, [], nodeIds(network1), [], cliques1, 'bk_box')"
+          value="Запустить (граф слева)"
+          />
+          <input
+          type="button"
+          onclick="document.getElementById('bk_box').value = ''; cliques2 = []; BK(network2, [], nodeIds(network2), [], cliques2, 'bk_box'); checkMode('selmode1')"
+          value="Запустить (граф справа)"
+          />
+      </div>
+      </td>
+    </tr>
+    </table>
   </body>
 </html>
