@@ -128,7 +128,7 @@ function draw() {
       editEdge: 'Редактировать ребро',
       addDescription: 'Кликните в свободное место, чтобы добавить новую вершину.',
       edgeDescription: 'Кликните на вершину и протяните ребро к другой вершине, чтобы соединить их.',
-      editEdgeDescription: 'Кликните на контрольные точки и протяните их к вершине, чтобы присоединить к ней ребро., // кластеры не используются
+      editEdgeDescription: 'Кликните на контрольные точки и протяните их к вершине, чтобы присоединить к ней ребро.', // кластеры не используются
       createEdgeError: 'Cannot link edges to a cluster.',
       deleteClusterError: 'Clusters cannot be deleted.',
       editClusterError: 'Clusters cannot be edited.'}
